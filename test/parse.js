@@ -168,8 +168,10 @@ describe('parse()', function () {
         expect(Qs.parse('foo[]=bar&foo[bad]=baz')).to.deep.equal({ foo: { '0': 'bar', bad: 'baz' } });
         expect(Qs.parse('foo[bad]=baz&foo[]=bar&foo[]=foo')).to.deep.equal({ foo: { bad: 'baz', '0': 'bar', '1': 'foo' } });
         expect(Qs.parse('foo[0][a]=a&foo[0][b]=b&foo[1][a]=aa&foo[1][b]=bb')).to.deep.equal({ foo: [{ a: 'a', b: 'b' }, { a: 'aa', b: 'bb' }] });
-        expect(Qs.parse('a[]=b&a[t]=u&a[hasOwnProperty]=c')).to.deep.equal({ a: { '0': 'b', t: 'u', c: true } });
-        expect(Qs.parse('a[]=b&a[hasOwnProperty]=c&a[x]=y')).to.deep.equal({ a: { '0': 'b', '1': 'c', x: 'y' } });
+        expect(Qs.parse('a[]=b&a[t]=u&a[hasOwnProperty]=c', { allowPrototypes: false })).to.deep.equal({ a: { 0: 'b', t: 'u' } });
+        expect(Qs.parse('a[]=b&a[t]=u&a[hasOwnProperty]=c', { allowPrototypes: true })).to.deep.equal({ a: { 0: 'b', t: 'u', hasOwnProperty: 'c' } });
+        expect(Qs.parse('a[]=b&a[hasOwnProperty]=c&a[x]=y', { allowPrototypes: false })).to.deep.equal({ a: { 0: 'b', x: 'y' } });
+        expect(Qs.parse('a[]=b&a[hasOwnProperty]=c&a[x]=y', { allowPrototypes: true })).to.deep.equal({ a: { 0: 'b', hasOwnProperty: 'c', x: 'y' } });
         done();
     });
 
@@ -453,10 +455,29 @@ describe('parse()', function () {
         done();
     });
 
+    it('does not allow overwriting prototype properties', function (done) {
+
+        expect(Qs.parse('a[hasOwnProperty]=b', { allowPrototypes: false })).to.deep.equal({});
+        expect(Qs.parse('hasOwnProperty=b', { allowPrototypes: false })).to.deep.equal({});
+
+        expect(Qs.parse('toString', { allowPrototypes: false })).to.deep.equal({}, 'bare "toString" results in {}');
+
+        done();
+    });
+
     it('can allow overwriting prototype properties', function (done) {
 
-        expect(Qs.parse('a[hasOwnProperty]=b', { allowPrototypes: true })).to.deep.equal({ a: { hasOwnProperty: 'b' } }, { prototype: false });
-        expect(Qs.parse('hasOwnProperty=b', { allowPrototypes: true })).to.deep.equal({ hasOwnProperty: 'b' }, { prototype: false });
+        expect(Qs.parse('a[hasOwnProperty]=b', { allowPrototypes: true })).to.deep.equal({ a: { hasOwnProperty: 'b' } });
+        expect(Qs.parse('hasOwnProperty=b', { allowPrototypes: true })).to.deep.equal({ hasOwnProperty: 'b' });
+
+        expect(Qs.parse('toString', { allowPrototypes: true })).to.deep.equal({ toString: '' }, 'bare "toString" results in { toString: "" }');
+
+        done();
+    });
+
+    it('params starting with a closing bracket', function (done) {
+
+        expect(Qs.parse(']=toString')).to.deep.equal({ ']': 'toString' });
         done();
     });
 

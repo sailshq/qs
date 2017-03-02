@@ -1,13 +1,13 @@
 {
-  "name": "qs",
+  "name": "@sailshq/qs",
   "version": "4.0.0",
   "description": "A querystring parser that supports nesting and arrays, with a depth limit",
-  "homepage": "https://github.com/hapijs/qs",
+  "homepage": "https://github.com/treelinehq/qs",
   "main": "lib/index.js",
   "dependencies": {},
   "devDependencies": {
     "browserify": "^10.2.1",
-    "code": "1.x.x",
+    "code": "1.4.1",
     "lab": "5.x.x"
   },
   "scripts": {
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hapijs/qs.git"
+    "url": "https://github.com/treelinehq/qs.git"
   },
   "keywords": [
     "querystring",
