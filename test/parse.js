@@ -190,9 +190,45 @@ describe('parse()', function () {
         done();
     });
 
+    it('params starting with a starting bracket', function (done) {
+
+        expect(Qs.parse('[=toString')).to.deep.equal({});
+        done();
+    });
+
     it('can add keys to objects', function (done) {
 
-        expect(Qs.parse('a[b]=c&a=d')).to.deep.equal({ a: { b: 'c', d: true } });
+        expect(Qs.parse('a[b]=c&a=d')).to.deep.equal({
+            a: {
+                b: 'c',
+                d: true
+            }
+        }, 'can add keys to objects');
+
+        expect(Qs.parse('a[b]=c&a=toString')).to.deep.equal({
+            a: {
+                b: 'c'
+            }
+        }, 'can not overwrite prototype');
+
+        expect(Qs.parse('a[b]=c&a=toString', {
+            allowPrototypes: true
+        })).to.deep.equal({
+            a: {
+                b: 'c',
+                toString: true
+            }
+        }, 'can overwrite prototype with allowPrototypes true');
+
+        expect(Qs.parse('a[b]=c&a=toString', {
+            plainObjects: true
+        })).to.deep.equal({
+            a: {
+                b: 'c',
+                toString: true
+            }
+        }, 'can overwrite prototype with plainObjects true');
+
         done();
     });
 
